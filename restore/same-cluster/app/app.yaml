@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dr-demo-app
+  namespace: dr-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dr-demo
+  template:
+    metadata:
+      labels:
+        app: dr-demo
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.27
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: dr-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dr-demo-service
+  namespace: dr-demo
+spec:
+  selector:
+    app: dr-demo
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
